@@ -43,23 +43,30 @@ DESCRIPTION
 
   THE Tree::M CLASS
 
-    $M = new Tree::M ndims, min, max, steps
+    $M = new Tree::M arg => value, ...
         Creates a new M-Tree. Before it can be used you have to call one of
-        the "create" or "open" methods.
+        the "create" or "open" methods below.
 
-           ndims    the number of dimensions each vector has
-           min      the lowest allowable scalar value in each dimension
-           max      the maximum allowable number
-           steps    the number of discrete steps (used when stored externally)
+           ndims => integer
+              the number of dimensions each vector has
+
+           range => [min, max, steps]
+              min      the lowest allowable scalar value in each dimension
+              max      the maximum allowable number
+              steps    the number of discrete steps (used when stored externally)
+
+           pagesize => integer
+              the size of one page on underlying storage. usually 4096, but
+              large objects (ndims > 20 or so) might want to increase this
 
         Example: create an M-Tree that stores 8-bit rgb-values:
 
-           $M = new Tree::M 3, 0, 255, 256;
+           $M = new Tree::M ndims => 3, range => [0, 255, 256];
 
         Example: create an M-Tree that stores coordinates from -1..1 with
         100 different steps:
 
-           $M = new Tree::M 2, -1, 1, 100;
+           $M = new Tree::M ndims => 2, range => [-1, 1, 100];
 
     $M->open(path)
     $M->create($path)
@@ -71,6 +78,10 @@ DESCRIPTION
     $M->insert(\@v, $data)
         Insert a vector (given by an array reference) into the index and
         associate it with the value "$data" (a 32-bit integer).
+
+    $M->sync
+        Synchronize the data file with memory. Useful after calling "insert"
+        to ensure the data actually reaches stable storage.
 
     $res = $M->range(\@v, $radius)
         Search all entries not farther away from "@v" then "$radius" and

@@ -94,7 +94,8 @@ MT::SplitTree(int *ncreated, int level, GiSTlist<MTentry *> *children, char *nam
 	} while(node->Level()>level);	// stop if we're at the split level
 	delete node;
 	while(!oldList->IsEmpty()) {	// now append each sub-tree to its root
-		MT *subtree=new MT;
+		MT *subtree=new MT (4096);
+                assert (!"fixme: pagesize above taken wherefrom?");
 		MTnode *newnode;
 
 		node=oldList->RemoveFront();
@@ -304,7 +305,8 @@ MT::BulkLoad(MTentry **data, int n, double padFactor, char *name)
 		// build an M-tree under each parent
 		nInit=nsamples;
 //		cout << "Now building " << nsamples << " sub-trees...\n";
-		MT *tree=new MT;
+		MT *tree=new MT (4096);
+                assert (!"fixme: pagesize above taken wherefrom?");
 
 //		for(i=0; i<nsamples; i++) cout << i+1 << "' set: " << ns[i] << endl;
 		for(i=0; i<nInit; i++) {

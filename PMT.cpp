@@ -19,40 +19,67 @@ kdup (double *k, int ndims)
 }
 */
 
+double *Object::data() const
+{
+  double *d = new double [NDIMS];
+
+  for (int i = NDIMS; i--; )
+     d[i] = int2double(k[i]);
+
+  return d;
+}
+
 double Object::distance(const Object& other) const
 {
-   int i;
-   double dist = 0;
+  if (ACC->distfast)
+    {
+      velem dist = 0;
 
-   for (i = NDIMS; i--; )
-     {
-       double d = other.k[i] - k[i];
+      for (int i = NDIMS; i--; )
+        {
+          long d = other.k[i] - k[i];
 
-       dist += d*d;
-     }
+          dist += (velem)(d*d);
+        }
 
-   return dist;
+      return dist * ACC->distmul;
+    }
+  else 
+    {
+      double dist = 0.;
+
+      for (int i = NDIMS; i--; )
+        {
+          double d = int2double(other.k[i]) - int2double(k[i]);
+
+          dist += (velem)(d*d);
+        }
+
+      return dist;
+    }
 }
 
 
 Object::Object(double *pkey)
 {
-  k = pkey;
+  k = new velem[NDIMS];
 
   // discretize the vector
   for (int i = NDIMS; i--; )
-     k[i] = int2double (double2int (k[i]));
+     k[i] = double2int (pkey[i]);
+
+  free (pkey);
 }
 
 Object::Object(char *key)
 {
   unsigned char *c = (unsigned char *)key;
 
-  k = new double [NDIMS];
+  k = new velem [NDIMS];
 
   for (int i = 0; i < NDIMS; i++)
     {
-      unsigned long elem = 0;
+      velem elem = 0;
 
       switch (ACC->elemsize)
         {
@@ -65,7 +92,7 @@ Object::Object(char *key)
             abort ();
         }
 
-      k[i] = int2double(elem);
+      k[i] = elem;
     }
 }
 
@@ -75,7 +102,7 @@ void Object::Compress(char *key)
 
   for (int i = 0; i < NDIMS; i++)
     {
-      unsigned long elem = double2int (k[i]);
+      velem elem = k[i];
 
       switch (ACC->elemsize)
         {
@@ -92,31 +119,47 @@ void Object::Compress(char *key)
 
 #define SETCUR current_pmt = this
 
-PMT::PMT(int ndims, double min, double max, double steps)
+PMT::PMT(int ndims, double min, double max, double steps, unsigned int pagesize)
 {
+  steps--;
+
+  assert (min <= 0);
+
   this->ndims = ndims;
   this->min   = min;
   this->max   = max;
   this->steps = steps;
 
-  if (steps <= (1<<8))
+  this->vzero = (velem)floor (- min * steps / max);
+
+  if (steps < (1<<8))
     elemsize = 1;
-  else if (steps <= (1<<16))
+  else if (steps < (1<<16))
     elemsize = 2;
-  else if (steps <= (1<<24))
+  else if (steps < (1<<24))
     elemsize = 3;
   else
     elemsize = 4;
 
   maxDist = (max - min) * (max - min) * ndims;
 
+  if (elemsize <= 2
+      && floor (steps * steps * 0.5 + 1) < velem(1<<31) / velem(ndims))
+    {
+      distfast = 1;
+      distmul = maxDist / double(steps * steps * ndims);
+    }
+  else
+    distfast = 0;
+
   SETCUR;
-  mt = new MT;
+  mt = new MT (pagesize);
 }
 
 PMT::~PMT()
 {
   SETCUR;
+  mt->Sync();
   delete mt;
 }
 
@@ -141,6 +184,12 @@ void PMT::insert(double *k, int data)
   mt->Insert(entry);
 }
 
+void PMT::sync()
+{
+  SETCUR;
+  mt->Sync();
+}
+
 double PMT::distance(double *k1, double *k2) const
 {
   SETCUR;
@@ -160,7 +209,9 @@ void PMT::range(double *k, double r) const
   while(!res.IsEmpty())
     {
       MTentry *e = res.RemoveFront ();
-      add_result(e->Ptr(), e->Key()->obj.data(), ndims);
+      double *data = e->Key()->obj.data ();
+      add_result(e->Ptr(), data, ndims);
+      delete data;
       delete e;
     }
 }

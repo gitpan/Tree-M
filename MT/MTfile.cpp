@@ -90,28 +90,123 @@ void
 MTfile::Close()
 {
 	if(!IsOpen()) return;
+        Sync();
 	close(fileHandle);
 	SetOpen(0);
+}
+
+MTfile::~MTfile()
+{
+	setcache (0);
+}
+
+void MTfile::setcache(unsigned int pages)
+{
+        Sync();
+
+        if (cachesize)
+          {
+            for (int i = cachesize; i--; )
+              delete [] cache[i].buf;
+
+            delete [] cache;
+          }
+
+        cachesize = pages;
+
+        if (cachesize)
+          {
+            cache = new Page[pages];
+            for (int i = cachesize; i--; )
+              {
+                cache[i].seq = 0;
+                cache[i].dirty = 0;
+                cache[i].page = (GiSTpage) -1;
+                cache[i].buf = new char[PageSize()];
+              }
+          }
+}
+
+static unsigned int seq;
+
+MTfile::Page *MTfile::newpage(GiSTpage page)
+{   
+          Page *p = &cache[0];
+
+          for (int i = cachesize; --i; ) {
+             if (cache[i].seq < p->seq)
+                p = &cache[i];
+          }
+
+          if (p->dirty)
+             flushpage (p);
+
+          p->seq = ++seq;
+          //min->dirty = 0;
+          p->page = page;
+
+          return p;
+}
+
+MTfile::Page *MTfile::findpage(GiSTpage page)
+{
+        for (int i = cachesize; i--; )
+           if (cache[i].page == page)
+             return &cache[i];
+
+        return 0;
+}
+
+void MTfile::flushpage(Page *p)
+{
+        assert (IsOpen());
+        lseek (fileHandle, p->page*PageSize(), SEEK_SET);
+        write (fileHandle, p->buf, PageSize());
+        p->dirty = 0;
+        IOwrite++;
 }
 
 void 
 MTfile::Read(GiSTpage page, char *buf)
 {
 	if(IsOpen()) {
-		lseek(fileHandle, page*PageSize(), SEEK_SET);
-		read(fileHandle, buf, PageSize());
-		IOread++;
+          Page *p = findpage (page);
+
+          if (p)
+            {
+              p->seq = ++seq;
+              memcpy (buf, p->buf, PageSize ());
+              return;
+            }
+
+          lseek(fileHandle, page*PageSize(), SEEK_SET);
+          read(fileHandle, buf, PageSize());
+          IOread++;
+
+          p = newpage (page);
+
+          memcpy (p->buf, buf, PageSize());
 	}
 }
 
 void 
 MTfile::Write(GiSTpage page, const char *buf)
 {
-	if(IsOpen()) {
-		lseek(fileHandle, page*PageSize(), SEEK_SET);
-		write(fileHandle, buf, PageSize());
-		IOwrite++;
-	}
+	Page *p = findpage (page);
+
+        if (!p)
+          p = newpage (page);
+
+        memcpy (p->buf, buf, PageSize ());
+        p->seq = ++seq;
+        p->dirty++;
+}
+
+void MTfile::Sync()
+{
+	for (int i = cachesize; i--; )
+          if (cache[i].dirty)
+             flushpage (&cache[i]);
 }
 
 GiSTpage 

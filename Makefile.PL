@@ -16,15 +16,30 @@ WriteMakefile(
     VERSION_FROM => 'M.pm',
 );
 
+print <<EOF;
+
+***
+*** This module is written in C++, which is nontrivial to integrate into
+*** most pre-built perls. If problems occur during compiling then edit (hack)
+***
+*** Makefile.PL
+*** GiST/Makefile MT/Makefile
+***
+*** in this order. Especially wautch out for compile and optimization flags.
+*** Have fun ;->
+***
+
+EOF
+
 sub MY::postamble { <<'EOF' }
 
 force :
 
 GiST/libGiST.a: force
-	cd GiST && make OPTIMIZE="$(OPTIMIZE)" CXX="$(CC)" LD="$(LD)" libGiST.a
+	cd GiST && $(MAKE) OPTIMIZE="$(OPTIMIZE)" CXX="$(CC)" LD="$(LD)" libGiST.a
 
 MT/libMT.a: GiST/libGiST.a force
-	cd MT && make OPTIMIZE="$(OPTIMIZE)" CXX="$(CC)" LD="$(LD)" libMT.a
+	cd MT && $(MAKE) OPTIMIZE="$(OPTIMIZE)" CXX="$(CC)" LD="$(LD)" libMT.a
 
 clean ::
 	cd MT && $(MAKE) clean

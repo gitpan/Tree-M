@@ -58,13 +58,14 @@ MODULE = Tree::M		PACKAGE = Tree::M
 PROTOTYPES: ENABLE
 
 PMT *
-new(class, ndims, min = 0.0, max = 255.0, steps = 65536.0)
+_new(class, ndims, min = 0.0, max = 255.0, steps = 256.0, pagesize = 4096)
         int		ndims
         double		min
         double		max
         double		steps
+        unsigned int	pagesize
 	CODE:
-        RETVAL = new PMT(ndims, min, max, steps);
+        RETVAL = new PMT(ndims, min, max, steps, pagesize);
         OUTPUT:
         RETVAL
 
@@ -111,6 +112,9 @@ PMT::top(k, n)
         RETVAL = newRV_noinc ((SV *)searchres);
         OUTPUT:
         RETVAL
+
+void
+PMT::sync()
 
 int
 PMT::maxlevel()

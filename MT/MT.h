@@ -78,7 +78,9 @@ typedef enum {
 } s_function;	// split functions
 
 class MT : public GiST {
+	unsigned int page;
 public:
+        MT(unsigned int pagesize) : page(pagesize) {};
 	// optional, for debugging support
 	GiSTobjid IsA() { return MT_CLASS; }
 
@@ -99,7 +101,7 @@ public:
 protected:
 	// Required members
 	GiSTnode  *CreateNode()  const { return new MTnode; }
-	GiSTstore *CreateStore() const { return new MTfile; }
+	GiSTstore *CreateStore() const { return new MTfile(page); }
 
 	// Service methods for Bulk Load
 	GiSTlist<char *> *SplitTree(int *ncreated, int level, GiSTlist<MTentry *> *children, char *name);	// split this M-tree into a list of M-trees whose names are returned

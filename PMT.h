@@ -3,6 +3,8 @@
 
 #include <GiSTlist.h>
 
+typedef unsigned long velem;
+
 class MT;
 
 class PMT {
@@ -16,10 +18,19 @@ public: // easier. I don't care anyways
 
   double maxDist;
   int elemsize;
+  velem vzero;
+
+  int distfast; // can distance be computed fast (integer arithmetic)
+  double distmul; // then use this corrective factor
 
 public:
-  PMT(int ndims, double min, double max, double steps);
+  PMT(int ndims,
+      double min,
+      double max,
+      double steps,
+      unsigned int pagesize);
   ~PMT();
+  void sync();
   void create(const char *path);
   void open(const char *path);
   void insert(double *k, int data);

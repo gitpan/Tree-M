@@ -11,56 +11,58 @@ inline int sizeofObject() { return ACC->ndims * ACC->elemsize; }
 
 class Object : public GiSTobject	// the DB object class
 {
-	double *k;
+	velem *k;
 
-        static double int2double(unsigned long i) {
+        static double int2double(velem i) {
           return i * ACC->max / ACC->steps + ACC->min;
         }
-        static unsigned long double2int(double d) {
-          return (unsigned long)floor ((d - ACC->min) * ACC->steps / ACC->max);
+        static velem double2int(double d) {
+          return (velem)floor ((d - ACC->min) * ACC->steps / ACC->max);
         }
 
 public:
 	Object() {
-          k = new double [NDIMS];
+          k = new velem [NDIMS];
+
           for (int i = NDIMS; i--; )
-            k[i] = 0.;
+            k[i] = ACC->vzero;
         }
 
         Object(double *pkey);
-
-	Object(const Object& obj) {
-          k = new double [NDIMS];
-          memcpy (k, obj.k, NDIMS * sizeof (double));
-        }
 
 	~Object() {
           delete [] k;
         }
 
+	Object(const Object& obj) {
+          k = new velem [NDIMS];
+          memcpy (k, obj.k, NDIMS * sizeof (velem));
+        }
+
 	Object& operator=(const Object& obj) {
           delete [] k;
 
-          k = new double [NDIMS];
-          memcpy (k, obj.k, NDIMS * sizeof (double));
+          k = new velem [NDIMS];
+          memcpy (k, obj.k, NDIMS * sizeof (velem));
         }
 
-	double area(double r) {
+	double area(double r) const {
           return 0;
 	}
 
-        double *data() {
-          return k;
-        }
+        double *data() const;
 
 	double distance(const Object& other) const;	// distance method (needed)
 
-	int operator==(const Object& obj)
+	int operator ==(const Object& obj) const
         {
-          return !memcmp (k, obj.k, NDIMS * sizeof (double));
+          return !memcmp (k, obj.k, NDIMS * sizeof (velem));
         }
 
-	int operator!=(const Object& obj) { return !(*this==obj); };	// inequality operator (needed)
+	int operator !=(const Object& obj) const
+        {
+          return !(*this==obj);
+        }
 
 	int CompressedLength() const {
           return sizeofObject();

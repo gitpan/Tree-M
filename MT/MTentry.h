@@ -26,13 +26,9 @@
 
 #include <string.h>
 #include <stdio.h>
-#ifndef MAXDOUBLE
-#ifdef _WIN32	// for MAXDOUBLE
 #include <float.h>
+#ifndef MAXDOUBLE
 #define MAXDOUBLE DBL_MAX
-#else
-#include <values.h>
-#endif
 #endif
 #include "GiST.h"
 #include "MTobject.h"

@@ -30,8 +30,29 @@
 //	UNIX/NT files. It is a copy of the GiSTfile class.
 
 class MTfile: public GiSTstore {
+	unsigned int page;
+        struct Page {
+          GiSTpage page;
+          char *buf;
+          int dirty;
+          int seq;
+        };
+        Page *cache;
+        unsigned int cachesize;
+
+        Page *newpage(GiSTpage page);
+        Page *findpage(GiSTpage page);
+        void flushpage(Page *p);
 public:
-	MTfile(): GiSTstore() {}
+        void setcache(unsigned int pages);
+
+	MTfile(unsigned int pagesize)
+          : GiSTstore(), page(pagesize), cachesize(0)
+          {
+            setcache (16);
+          }
+
+        ~MTfile();
 
 	void Create(const char *filename);
 	void Open(const char *filename);
@@ -41,9 +62,8 @@ public:
 	void Write(GiSTpage page, const char *buf);
 	GiSTpage Allocate();
 	void Deallocate(GiSTpage page);
-	void Sync() {}
-//	int PageSize() const { return 65536; }
-	int PageSize() const { return 4096; }
+	void Sync();
+	int PageSize() const { return page; }
 
 private:
 	int fileHandle;

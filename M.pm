@@ -4,7 +4,7 @@ use Carp;
 use DynaLoader;
 
 BEGIN {
-   $VERSION = 0.01;
+   $VERSION = 0.02;
    @ISA = qw(DynaLoader);
    bootstrap Tree::M, $VERSION;
 }
@@ -50,23 +50,30 @@ suared euclidean metric (i.e. C<(x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2 +
 
 =over 4
 
-=item $M = new Tree::M ndims, min, max, steps
+=item $M = new Tree::M arg => value, ...
 
 Creates a new M-Tree. Before it can be used you have to call one of the
-C<create> or C<open> methods.
+C<create> or C<open> methods below.
 
-   ndims    the number of dimensions each vector has
-   min      the lowest allowable scalar value in each dimension
-   max      the maximum allowable number
-   steps    the number of discrete steps (used when stored externally)
+   ndims => integer
+      the number of dimensions each vector has
+
+   range => [min, max, steps]
+      min      the lowest allowable scalar value in each dimension
+      max      the maximum allowable number
+      steps    the number of discrete steps (used when stored externally)
+
+   pagesize => integer
+      the size of one page on underlying storage. usually 4096, but
+      large objects (ndims > 20 or so) might want to increase this
 
 Example: create an M-Tree that stores 8-bit rgb-values:
 
-   $M = new Tree::M 3, 0, 255, 256;
+   $M = new Tree::M ndims => 3, range => [0, 255, 256];
 
 Example: create an M-Tree that stores coordinates from -1..1 with 100 different steps:
 
-   $M = new Tree::M 2, -1, 1, 100;
+   $M = new Tree::M ndims => 2, range => [-1, 1, 100];
 
 =item $M->open(path)
 
@@ -80,6 +87,11 @@ Open or create the external storage file C<$path> and associate it with the tree
 
 Insert a vector (given by an array reference) into the index and associate
 it with the value C<$data> (a 32-bit integer).
+
+=item $M->sync
+
+Synchronize the data file with memory. Useful after calling C<insert> to
+ensure the data actually reaches stable storage.
 
 =item $res = $M->range(\@v, $radius)
 
@@ -108,6 +120,18 @@ Return the maximum height of the tree (usually a small integer specifying
 the length of the path from the root to the farthest leaf)
 
 =cut
+
+sub new {
+   my $class = shift;
+   my %a = @_;
+   $class->_new(
+         $a{ndims},
+         $a{range}[0],
+         $a{range}[1],
+         $a{range}[2],
+         $a{pagesize},
+   );
+}
 
 =back
 
