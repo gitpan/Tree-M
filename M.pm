@@ -4,7 +4,7 @@ use Carp;
 use DynaLoader;
 
 BEGIN {
-   $VERSION = 0.03;
+   $VERSION = 0.031;
    @ISA = qw(DynaLoader);
    bootstrap Tree::M, $VERSION;
 }
@@ -142,7 +142,7 @@ die, so don't do that.
 
 =head1 AUTHOR
 
-Marc Lehmann <pcg@goof.com>.
+Marc Lehmann <schmorp@schmorp.de>.
 
 =head1 SEE ALSO
 
