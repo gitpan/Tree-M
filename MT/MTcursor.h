@@ -42,7 +42,7 @@ class MTpred;
 class dst {	// this class is used in the NN-search algorithm for the priority queue
 public:
 	dst(): bound(0), d(MAXDOUBLE) {}
-	dst(GiSTpath p, double LB, double dist): path(p), bound(LB), d(dist) {}
+	dst(GiSTpath p, double LB, double dist): bound(LB), d(dist), path(p) {}
 
 	double Bound() const { return bound; }
 	double Dist() const { return d; }

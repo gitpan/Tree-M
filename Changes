@@ -1,5 +1,8 @@
 Revision history for Perl extension Tree::M
 
+0.03  Fri Jul 27 14:47:37 CEST 2001
+	- minor c++ fixes to make it more compliant ;) to the c++ standard.
+
 0.02  Sun May 27 15:39:08 CEST 2001
 	- corrected off-by-one in steps interpretation.
 	- some Makefile improvements. Thanks to the cpan-testers for all their

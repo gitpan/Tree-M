@@ -1,8 +1,8 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include <cstdlib>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 #include "PMT.h"
 

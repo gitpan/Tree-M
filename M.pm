@@ -4,7 +4,7 @@ use Carp;
 use DynaLoader;
 
 BEGIN {
-   $VERSION = 0.02;
+   $VERSION = 0.03;
    @ISA = qw(DynaLoader);
    bootstrap Tree::M, $VERSION;
 }

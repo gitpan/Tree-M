@@ -95,8 +95,8 @@ public:
 
 	// friend methods and functions
 	friend void MTnode::InvalidateEntry(BOOL isNew);
-	friend GiSTlist<GiSTobject *> MTnode::RangeSearch(const MTquery& query);
-	friend MTentry *MTcursor::FetchNode();
+	friend GiSTlist<MTentry *> MTnode::RangeSearch(const MTquery& query);
+	friend void MTcursor::FetchNode();
 
 protected:
 	// Required members

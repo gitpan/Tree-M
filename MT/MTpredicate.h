@@ -344,8 +344,8 @@ private:
 class TopQuery: public GiSTobject {	// a simple k-NN query
 public:
 	// constructors, destructors, etc.
-	TopQuery(const MTpred *p, const int n) : pred((MTpred *)p->Copy()), k(n) {}
-	TopQuery(const TopQuery& q) : pred((MTpred *)q.pred->Copy()), k(q.k) {}
+	TopQuery(const MTpred *p, const int n) : k(n), pred((MTpred *)p->Copy()) {}
+	TopQuery(const TopQuery& q) : k(q.k), pred((MTpred *)q.pred->Copy()) {}
 	GiSTobject *Copy() const { return new TopQuery(*this); }
 	~TopQuery() { delete pred; }
 

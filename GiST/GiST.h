@@ -3,7 +3,7 @@
 //         GiST.h
 //
 // Copyright (c) 1996, Regents of the University of California
-// $Header: /cvsroot/Tree-M/GiST/GiST.h,v 1.1 2001/05/06 00:45:51 root Exp $
+// $Header: /cvsroot/Tree-M/GiST/GiST.h,v 1.2 2001/07/27 12:48:23 root Exp $
 
 #ifndef GIST_H
 #define GIST_H
@@ -89,6 +89,6 @@ private:
 	int isOpen;
 	int debug;
 
-	friend GiSTcursor;
+	friend class GiSTcursor;
 };
 #endif

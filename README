@@ -70,22 +70,22 @@ DESCRIPTION
 
     $M->open(path)
     $M->create($path)
-        Open or create the external storage file "$path" and associate it
-        with the tree.
+        Open or create the external storage file $path and associate it with
+        the tree.
 
         [this braindamaged API will go away ;)]
 
     $M->insert(\@v, $data)
         Insert a vector (given by an array reference) into the index and
-        associate it with the value "$data" (a 32-bit integer).
+        associate it with the value $data (a 32-bit integer).
 
     $M->sync
         Synchronize the data file with memory. Useful after calling "insert"
         to ensure the data actually reaches stable storage.
 
     $res = $M->range(\@v, $radius)
-        Search all entries not farther away from "@v" then "$radius" and
-        return an arrayref containing the searchresults.
+        Search all entries not farther away from @v then $radius and return
+        an arrayref containing the searchresults.
 
         Each result is again anarrayref composed like this:
 
@@ -94,8 +94,8 @@ DESCRIPTION
         e.g. the same as given to the "insert" method.
 
     $res = $M->top(\@v, $n)
-        Return the "$n" "nearest neighbours". The results arrayref (see
-        "range") contains the "$n" index values nearest to "@v", sorted for
+        Return the $n "nearest neighbours". The results arrayref (see
+        "range") contains the $n index values nearest to @v, sorted for
         distance.
 
     $distance = $M->distance(\@v1, \@v2)

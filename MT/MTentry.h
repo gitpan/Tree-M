@@ -44,7 +44,7 @@ public:
 private:
 	double rmin, rmax;	// covering radii
 public:
-friend MTentry;
+friend class MTentry;
 	// constructors, destructors, assignment, etc.
 	MTkey(): rmin(0), rmax(MAXDOUBLE), distance(-maxDist()), splitted(FALSE), recomp(FALSE) { }
 
